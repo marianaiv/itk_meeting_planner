@@ -1,4 +1,4 @@
-name: Daily Mattermost Rota
+name: Weekly ITk meeting rotation
 
 on:
   schedule:
