@@ -2,26 +2,28 @@ name: Weekly ITk meeting rotation
 
 on:
   schedule:
-    - cron: "0 7 * * 1-5"   # Weekdays at 07:00 UTC
-  workflow_dispatch: {}     # Allow manual run for testing
-
-concurrency:
-  group: mattermost-rota
-  cancel-in-progress: false
+    - cron: "0 6 * * 5"   # 08:00 Berlin during CEST (UTC+2)
+    - cron: "0 7 * * 5"   # 08:00 Berlin during CET  (UTC+1)
+  workflow_dispatch: {}
 
 jobs:
   post:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-
       - run: pip install -r requirements.txt
 
-      - name: Post rota if today matches
+      - name: Run only at 08:00 Europe/Berlin
+        run: |
+          if [ "$(TZ=Europe/Berlin date +%H)" != "08" ]; then
+            echo "Not 08:00 Berlin; skipping."
+            exit 0
+          fi
+
+      - name: Post rota (3 days in advance)
         env:
           MATTERMOST_WEBHOOK_URL: ${{ secrets.MATTERMOST_WEBHOOK_URL }}
-        run: python scripts/post_rota.py
+        run: python scripts/post_rota.py --advance-days 3
