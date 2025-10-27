@@ -1,0 +1,27 @@
+name: Daily Mattermost Rota
+
+on:
+  schedule:
+    - cron: "0 7 * * 1-5"   # Weekdays at 07:00 UTC
+  workflow_dispatch: {}     # Allow manual run for testing
+
+concurrency:
+  group: mattermost-rota
+  cancel-in-progress: false
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - run: pip install -r requirements.txt
+
+      - name: Post rota if today matches
+        env:
+          MATTERMOST_WEBHOOK_URL: ${{ secrets.MATTERMOST_WEBHOOK_URL }}
+        run: python scripts/post_rota.py
