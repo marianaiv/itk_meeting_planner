@@ -37,7 +37,11 @@ notes = match["notes"].strip()
 weekday = target.strftime("%A")  # e.g., Monday
 nice_when = f"{weekday} {target_iso}"
 
-text = f"🔔 Reminder: on {nice_when} the meeting is chaired by {chair} and notes are taken by {notes}."
+text = (
+    "#### ‼️ Reminder:\n"
+    f"On {nice_when} the ITk detector meeting is chaired by 🪑 {chair} and minutes are taken by 📝 {notes}."
+    f"Please find a replacement if you can't attend."
+)
 
 r = requests.post(WEBHOOK_URL, json={"text": text}, timeout=10)
 if r.status_code // 100 != 2:
