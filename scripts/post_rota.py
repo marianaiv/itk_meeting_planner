@@ -38,8 +38,8 @@ weekday = target.strftime("%A")  # e.g., Monday
 nice_when = f"{weekday} {target_iso}"
 
 text = (
-    "#### ‼️ Reminder:\n"
-    f"On {nice_when} the ITk detector meeting is chaired by 🪑 {chair} and minutes are taken by 📝 {notes}."
+    "##### ‼️ Reminder:\n"
+    f"On {nice_when} the ITk detector meeting is chaired by 🪑 {chair} and minutes are taken by 📝 {notes} .\n"
     f"Please find a replacement if you can't attend."
 )
 
