@@ -16,14 +16,13 @@ jobs:
           python-version: "3.11"
       - run: pip install -r requirements.txt
 
-      - name: Run only at 08:00 Europe/Berlin
+      - name: Post rota only at 08:00 Europe/Berlin
+        env:
+          MATTERMOST_WEBHOOK_URL: ${{ secrets.MATTERMOST_WEBHOOK_URL }}
         run: |
           if [ "$(TZ=Europe/Berlin date +%H)" != "08" ]; then
             echo "Not 08:00 Berlin; skipping."
             exit 0
           fi
 
-      - name: Post rota (3 days in advance)
-        env:
-          MATTERMOST_WEBHOOK_URL: ${{ secrets.MATTERMOST_WEBHOOK_URL }}
-        run: python scripts/post_rota.py --advance-days 3
+          python scripts/post_rota.py --advance-days 3
