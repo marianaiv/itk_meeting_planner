@@ -1,11 +1,15 @@
 #!/usr/bin/env python3
-import csv, os, sys, argparse
+import csv, os, sys, argparse, io
 from datetime import datetime, date, timedelta
 from zoneinfo import ZoneInfo
 import requests
 
 TZ = ZoneInfo("Europe/Berlin")
 CSV_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "rota.csv")
+
+SHARE_URL = os.environ.get("ROTA_SHARE_URL", "https://syncandshare.desy.de/index.php/s/PXG3rfMC8ZtWSiW")
+CSV_URL = os.environ.get("ROTA_CSV_URL", SHARE_URL.rstrip("/") + "/download")
+
 WEBHOOK_URL = os.environ.get("MATTERMOST_WEBHOOK_URL")
 
 parser = argparse.ArgumentParser()
@@ -22,9 +26,24 @@ base = date.fromisoformat(args.date) if args.date else datetime.now(TZ).date()
 target = base + timedelta(days=args.advance_days)
 target_iso = target.isoformat()
 
-# Read CSV and look for meeting on target date
-with open(CSV_PATH, newline="", encoding="utf-8") as f:
-    rows = list(csv.DictReader(f))
+def load_rows():
+    # Try remote first
+    try:
+        resp = requests.get(CSV_URL, timeout=15, allow_redirects=True)
+        resp.raise_for_status()
+        # Requests will decode based on headers; set a fallback if needed:
+        resp.encoding = resp.encoding or "utf-8"
+        return list(csv.DictReader(io.StringIO(resp.text)))
+    except Exception as e:
+        # Fallback to repo file if remote is down
+        try:
+            with open(CSV_PATH, newline="", encoding="utf-8") as f:
+                return list(csv.DictReader(f))
+        except Exception:
+            print(f"Failed to download rota CSV from {CSV_URL}: {e}", file=sys.stderr)
+            raise
+
+rows = load_rows()
 
 match = next((r for r in rows if r["date"].strip() == target_iso), None)
 if not match:
