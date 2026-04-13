@@ -2,8 +2,8 @@ name: Weekly ITk meeting rotation
 
 on:
   schedule:
-    - cron: "0 6 * * 5"   # 08:00 Berlin during CEST (UTC+2)
-    - cron: "0 7 * * 5"   # 08:00 Berlin during CET  (UTC+1)
+    - cron: "7 8 * * 5"
+      timezone: "Europe/Berlin"
   workflow_dispatch: {}
 
 jobs:
@@ -16,13 +16,7 @@ jobs:
           python-version: "3.11"
       - run: pip install -r requirements.txt
 
-      - name: Post rota only at 08:00 Europe/Berlin
+      - name: Post rota
         env:
           MATTERMOST_WEBHOOK_URL: ${{ secrets.MATTERMOST_WEBHOOK_URL }}
-        run: |
-          if [ "$(TZ=Europe/Berlin date +%H)" != "08" ]; then
-            echo "Not 08:00 Berlin; skipping."
-            exit 0
-          fi
-
-          python scripts/post_rota.py --advance-days 3
+        run: python scripts/post_rota.py --advance-days 3

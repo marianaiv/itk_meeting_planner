@@ -26,6 +26,10 @@ base = date.fromisoformat(args.date) if args.date else datetime.now(TZ).date()
 target = base + timedelta(days=args.advance_days)
 target_iso = target.isoformat()
 
+now = datetime.now(TZ)
+print(f"Current Berlin time: {now.isoformat()}")
+print(f"Base date: {base.isoformat()}, target date: {target_iso}, advance_days={args.advance_days}")
+
 def load_rows():
     # Try remote first
     try:
